@@ -1,8 +1,12 @@
-import { FullSizeWrap, Title, withSSEClient } from '@lonord/pi-dashboard-components'
-import { Dialog } from '@lonord/react-electron-components'
+import { FullSizeWrap, LoadingText, Title, withHTTPClient, withSSEClient } from '@lonord/pi-dashboard-components'
+import { Dialog, FlexItemAdaptive, withFlexVertical } from '@lonord/react-electron-components'
 import * as React from 'react'
 import styled from 'styled-components'
+import { DevSpeed, DevUsage } from './declare'
+import Detail from './dialog-detail'
 import { name as displayName } from './index'
+import Item from './item'
+import { combineDevItems } from './util'
 
 interface MainPropsMap {
 	selectedDevNames: string[]
@@ -11,7 +15,8 @@ interface MainPropsMap {
 }
 
 interface MainProps extends MainPropsMap {
-	speedData: Array<{ dev: string, tps: number, read: number, write: number }>
+	speedData: DevSpeed[]
+	usageData: DevUsage[]
 	updateProps: <K extends keyof MainPropsMap>(props: Pick<MainPropsMap, K>) => void
 }
 
@@ -37,21 +42,60 @@ class Main extends React.Component<MainProps, MainState> {
 		})
 	}
 
+	updateSelectedDevNames = (devNames: string[]) => {
+		this.props.updateProps({
+			selectedDevNames: devNames
+		})
+	}
+
 	render() {
-		const { rpcBaseUrl, nameAlias, speedData } = this.props
+		const { rpcBaseUrl, nameAlias, speedData, usageData, selectedDevNames } = this.props
 		const { isDetailOpen } = this.state
-		const diskSpeedList = speedData || []
-		const alias = nameAlias || {}
+		const items = combineDevItems(selectedDevNames, speedData || [], usageData || [], nameAlias || {})
 		return (
-			<FullSizeWrap onClick={this.openDetail}>
+			<Wrap onClick={this.openDetail}>
 				<Title borderColor="#757575">{displayName}</Title>
-				123
+				<ContentWrap>
+					{items.map((item) => (
+						<ContentItem key={item.dev}>
+							<Item {...item}/>
+						</ContentItem>
+					))}
+					{items.length === 0
+						? <LoadingText>请选择磁盘</LoadingText>
+						: null}
+				</ContentWrap>
 				<Dialog isOpen={isDetailOpen} onClose={this.closeDetail} title={displayName}>
-					123
+					<Detail
+						selectedDevNames={selectedDevNames}
+						speedData={speedData}
+						usageData={usageData}
+						nameAlias={nameAlias}
+						updateSelectedDevNames={this.updateSelectedDevNames}/>
 				</Dialog>
-			</FullSizeWrap>
+			</Wrap>
 		)
 	}
 }
 
-export default withSSEClient(Main, 'disk-iostat', () => ({ interval: 5000 }), 'speedData')
+const Wrap = withFlexVertical(FullSizeWrap)
+
+const ContentWrap = withFlexVertical(FlexItemAdaptive.extend`
+	justify-content: space-around;
+`)
+
+const ContentItem = styled.div`
+	padding: 0 4px;
+`
+
+export default withHTTPClient(
+	withSSEClient(
+		Main,
+		'disk-iostat',
+		() => ({ interval: 5000 }),
+		'speedData'),
+	'disk-usage',
+	() => null,
+	10000,
+	'usageData'
+)
