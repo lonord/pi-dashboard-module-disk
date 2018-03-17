@@ -35,9 +35,9 @@ export default class Item extends React.Component<ItemProps, any> {
 					<SmallIndicatorButton showColor={selectTPSIndicatorColor(tps)} />
 					<span>TPS</span>
 					<SmallNumAreaSpan>{tps < 0 ? '-' : tps}</SmallNumAreaSpan>
-					<span>{' | '}</span>
+					<span>{' | ↑'}</span>
 					<NumAreaSpan>{formatBytes(read)}/s</NumAreaSpan>
-					<span>{' | '}</span>
+					<span>{' | ↓'}</span>
 					<NumAreaSpan>{formatBytes(write)}/s</NumAreaSpan>
 				</SubTitleSmallSmall>
 			</div>
