@@ -28,7 +28,7 @@ export default class Item extends React.Component<ItemProps, any> {
 		const displayName = name ? `${name}(${dev})` : dev
 		return (
 			<div>
-				<SubTitle>{displayName}</SubTitle>
+				<SubTitleDeepColor>{displayName}</SubTitleDeepColor>
 				<ProgressBar progress={total > 0 ? used * 100 / total : 0} />
 				<SubTitleSmall>{formatKiloBytes(total - used) + ' 可用，共 ' + formatKiloBytes(total)}</SubTitleSmall>
 				<SubTitleSmallSmall>
@@ -44,6 +44,10 @@ export default class Item extends React.Component<ItemProps, any> {
 		)
 	}
 }
+
+const SubTitleDeepColor = SubTitle.extend`
+	color: #616161;
+`
 
 const SubTitleSmall = SubTitle.extend`
 	margin-top: 4px;

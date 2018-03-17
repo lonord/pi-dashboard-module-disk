@@ -1,6 +1,6 @@
 {
   "name": "@lonord/pi-dashboard-module-disk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Disk status module for pi dashboard",
   "main": "lib/",
   "types": "lib/",
